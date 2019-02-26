@@ -148,7 +148,7 @@ export default class ViewLead extends Component {
           </View>
 
           <View style={styles.card}>
-            <NameText style={{ fontSize: 20 }}>REMARKS</NameText>
+            <NameText style={{ fontSize: 20, height: 30 }}>REMARKS</NameText>
             <View style={{ height: 10 }} />
             <View style={styles.flexRow}>
               <NameText>Strength</NameText>

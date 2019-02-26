@@ -15,6 +15,9 @@ import DashBoard from "./screens/DashBoard";
 import AddLead from "./screens/AddLead";
 import StatusList from "./screens/StatusList";
 import ViewLead from "./screens/ViewLead";
+import ForgotPassword from "./screens/ForgotPassword/ForgotPassword";
+import OTPScreen from "./screens/ForgotPassword/OTPScreen";
+import ChangePassword from "./screens/ForgotPassword/ChangePassword";
 
 const AppNavigator = createStackNavigator(
   {
@@ -57,6 +60,36 @@ const AppNavigator = createStackNavigator(
     ViewLead: {
       screen: ViewLead,
       navigationOptions: {
+        headerStyle: {
+          backgroundColor: "#57687c"
+        },
+        headerTintColor: "#fff"
+      }
+    },
+    ForgotPassword: {
+      screen: ForgotPassword,
+      navigationOptions: {
+        title: "Password Recovery",
+        headerStyle: {
+          backgroundColor: "#57687c"
+        },
+        headerTintColor: "#fff"
+      }
+    },
+    OTPScreen: {
+      screen: OTPScreen,
+      navigationOptions: {
+        title: "Verify Number",
+        headerStyle: {
+          backgroundColor: "#57687c"
+        },
+        headerTintColor: "#fff"
+      }
+    },
+    ChangePassword: {
+      screen: ChangePassword,
+      navigationOptions: {
+        title: "New Password",
         headerStyle: {
           backgroundColor: "#57687c"
         },

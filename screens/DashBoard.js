@@ -10,15 +10,19 @@ import {
 import styled from "styled-components";
 
 export default class HomeScreen extends Component {
-  static navigationOptions = {
-    title: "DashBoard",
-    headerRight: (
-      <Button
-        onPress={() => alert("This is a button!")}
-        title="LogOut"
-        color="#444"
-      />
-    )
+  static navigationOptions = ({ navigation }) => {
+    return {
+      title: "Hi,Dhananjay!",
+      headerRight: (
+        <Button
+          onPress={() => {
+            navigation.navigate("Login");
+          }}
+          title="LogOut"
+          color="#444"
+        />
+      )
+    };
   };
   render() {
     return (
@@ -100,7 +104,7 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: "#ced9e4",
-    padding: 20,
+    padding: 10,
     borderWidth: 1,
     borderColor: "#2F4F4F",
     margin: 20,
@@ -132,11 +136,12 @@ const styles = StyleSheet.create({
 });
 const ValueText = styled.Text`
   height: 25px;
-  font-size: 20px;
+  font-size: 25px;
   font-weight: 600;
   font-style: normal;
   text-align: center;
   color: rgba(3, 15, 41, 0.9);
+  flex: 0.7;
 `;
 const NameText = styled.Text`
   height: 22px;
