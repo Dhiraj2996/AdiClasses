@@ -200,7 +200,7 @@ export default class ViewLead extends Component {
               />
             </View>
             <View style={styles.flexColumn}>
-              <NameText>infrastructure</NameText>
+              <NameText>Infrastructure</NameText>
               <RadioForm
                 radio_props={infrastucture_props}
                 initial={this.state.infrastructure}
