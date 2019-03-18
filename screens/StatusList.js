@@ -14,38 +14,68 @@ export default class StatusList extends Component {
       title: navigation.getParam("pageTitle")
     };
   };
+  state = {
+    datalist: []
+  };
+  componentDidMount = () => {
+    this.setState({ datalist: this.props.navigation.getParam("datalist") });
+    console.log("CheckPoint1:");
+    //this.props.navigation.getParam("datalist").map(item => console.log(item));
+    //console.log(this.state.datalist);
+  };
+
   render() {
     return (
       <View style={styles.container}>
         <ScrollView style={{ flex: 1 }}>
-          <ListCard
+          {/* <ListCard
             name="Ujwal Tale"
             contact="7776661118"
             class="12th Class"
             address="Model Coloney,Pune"
             navigation={this.props.navigation}
           />
-          <ListCard
-            name="Raj Malhotra"
-            contact="7776661118"
-            class="11th Class"
-            address="Mumbai"
-            navigation={this.props.navigation}
-          />
-          <ListCard
-            name="Dinesh"
-            contact="7776661118"
-            class="7th Class"
-            address="Pune"
-            navigation={this.props.navigation}
-          />
+          
+          
           <ListCard
             name="Ujwal Tale"
             contact="7776661118"
             class="12th Class"
             address="Model Coloney,Pune"
             navigation={this.props.navigation}
-          />
+          /> */}
+          {this.state.datalist &&
+            this.state.datalist.map((item, index) => {
+              if (item.school) {
+                //this is b2b lead
+                return (
+                  <ListCard
+                    key={index}
+                    name={item.school}
+                    contact={item.mobile1}
+                    class={item.city}
+                    address={item.state}
+                    navigation={this.props.navigation}
+                    leadtype="0"
+                    dataItem={item}
+                  />
+                );
+              } else {
+                //this is b2c lead
+                return (
+                  <ListCard
+                    key={index}
+                    name={item.studentName}
+                    contact={item.mobile1}
+                    class={item.divisionClass}
+                    address={item.city + "," + item.state}
+                    navigation={this.props.navigation}
+                    leadtype="1"
+                    dataItem={item}
+                  />
+                );
+              }
+            })}
         </ScrollView>
       </View>
     );
@@ -60,10 +90,8 @@ class ListCard extends Component {
         onPress={() => {
           console.log("card clicked");
           this.props.navigation.navigate("ViewLead", {
-            name: this.props.name,
-            contact: this.props.contact,
-            class: this.props.class,
-            address: this.props.address
+            dataItem: this.props.dataItem,
+            leadtype: this.props.leadtype
           });
         }}
       >

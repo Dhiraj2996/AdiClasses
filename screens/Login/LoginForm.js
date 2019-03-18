@@ -4,10 +4,77 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet
+  StyleSheet,
+  Alert,
+  AsyncStorage
 } from "react-native";
+import { LoginUrl } from "../../assests/ApiUrl";
 
 export default class LoginForm extends Component {
+  state = {
+    mobileNumber: "",
+    password: ""
+  };
+  LoginApi = (phno, pwd) => {
+    console.log("In LoginApi");
+    fetch(LoginUrl, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        mobileNumber: phno,
+        password: pwd
+      })
+    })
+      .then(data => {
+        return data.json();
+      })
+      .then(data => {
+        //console.log("Login Response", data);
+
+        if (data.message == "Login succesfully") {
+          //this._storeData(data.userId);
+          console.log("data received: " + data.userId + " " + data.userName);
+          this._storeData(data.userId, data.userName);
+          this.props.navigation.navigate("DashBoard", {
+            userName: data.userName
+          });
+        } else if (data.message) {
+          Alert.alert("Invalid Username or Password");
+        }
+      })
+      .catch(error => {
+        console.log("Api call error");
+        console.log(error.message);
+      });
+  };
+  _storeData = async (user_id, user_name) => {
+    try {
+      console.log("storing: " + user_id + " " + user_name);
+      await AsyncStorage.multiSet([
+        ["userId", JSON.stringify(user_id)],
+        ["userName", user_name]
+      ]);
+    } catch (error) {
+      // Error saving data
+      console.log(error);
+    }
+  };
+
+  Login = () => {
+    //console.log(      "In Login m:" + this.state.mobileNumber + " p:" + this.state.password    );
+    if (this.state.password == "") {
+      Alert.alert("Please Enter Password");
+      return;
+    }
+    if (this.state.mobileNumber == "") {
+      Alert.alert("Please Enter Mobile Number");
+    }
+
+    this.LoginApi(this.state.mobileNumber, this.state.password);
+  };
   render() {
     return (
       <View style={styles.container}>
@@ -20,6 +87,7 @@ export default class LoginForm extends Component {
           returnKeyType="next"
           placeholder="Mobile Number"
           placeholderTextColor="rgba(225,225,225,0.7)"
+          onChangeText={text => this.setState({ mobileNumber: text })}
         />
 
         <TextInput
@@ -27,6 +95,7 @@ export default class LoginForm extends Component {
           returnKeyType="go"
           ref={input => (this.passwordInput = input)}
           placeholder="Password"
+          onChangeText={text => this.setState({ password: text })}
           placeholderTextColor="rgba(225,225,225,0.7)"
           secureTextEntry
         />
@@ -34,7 +103,7 @@ export default class LoginForm extends Component {
         <TouchableOpacity
           style={styles.buttonContainer}
           onPress={() => {
-            this.props.navigation.navigate("DashBoard");
+            this.Login();
           }}
         >
           <Text style={styles.buttonText}>LOGIN</Text>

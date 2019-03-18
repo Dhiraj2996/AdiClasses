@@ -8,7 +8,8 @@ import {
   TouchableOpacity,
   Linking,
   DatePickerAndroid,
-  TimePickerAndroid
+  TimePickerAndroid,
+  Alert
 } from "react-native";
 import styled from "styled-components";
 import RadioForm, {
@@ -16,14 +17,15 @@ import RadioForm, {
   RadioButtonInput,
   RadioButtonLabel
 } from "react-native-simple-radio-button";
+import { EditB2BLeadURL, EditB2CLeadURL } from "../assests/ApiUrl";
 
 var radio_props = [
-  { label: "Verified", value: 0 },
-  { label: "Unverified", value: 1 },
-  { label: "Dead", value: 2 },
-  { label: "Followup", value: 3 },
-  { label: "Appointment Fixed", value: 4 },
-  { label: "Appointment Done", value: 5 }
+  { label: "unverified", value: 0 },
+  { label: "verified", value: 1 },
+  { label: "dead", value: 2 },
+  { label: "followup", value: 3 },
+  { label: "appointment fixed", value: 4 },
+  { label: "appointment done", value: 5 }
 ];
 var scholar_props = [
   { label: "Day Scholar", value: 0 },
@@ -53,6 +55,8 @@ export default class ViewLead extends Component {
   state = {
     editable: false,
     leadType: 0,
+    leadId: 0,
+    status: "unverified",
 
     b2bschoolName: "My School Name",
     b2bCity: "Pune",
@@ -81,7 +85,6 @@ export default class ViewLead extends Component {
     b2cStudentMobile1: "1234567890",
     b2cStudentMobile2: "2342342390",
     b2cStudentClass: "8th",
-    b2cStudentEmail: "iam@student.com",
     b2cSchoolName: "Allen",
     b2cSchoolEmail: "thisis@school.com",
     b2cSchoolAddress: "Swargate",
@@ -94,13 +97,61 @@ export default class ViewLead extends Component {
     b2cCoaching: "CET,IIT"
   };
   componentDidMount() {
-    this.setState({
-      name: this.props.navigation.getParam("name"),
-      contactNumber: this.props.navigation.getParam("contact"),
-      class: this.props.navigation.getParam("class"),
-      address: this.props.navigation.getParam("address")
-    });
+    let dataItem = this.props.navigation.getParam("dataItem");
+    let tempLead = this.props.navigation.getParam("leadtype");
+    console.log("TempLead:" + tempLead);
+    if (tempLead == "0") {
+      this.setState({
+        leadType: 0,
+        b2bschoolName: dataItem.school,
+        b2bCity: dataItem.city,
+        b2bDistrict: dataItem.districtName,
+        b2bState: dataItem.state,
+        b2bPrincipalName: dataItem.principleName,
+        b2bPrincipalMobile1: dataItem.mobile1,
+        b2bPrincipalMobile2: dataItem.mobile2,
+        b2bPrincipalEmail: dataItem.email,
+        b2bContactPersonName: dataItem.contactPersonName,
+        b2bContactPersonMobile: dataItem.mobile,
+        b2bClass12Strength: dataItem.strength12,
+        b2bClass11Strength: dataItem.strength11,
+        b2b11thFee: dataItem.fee11,
+        b2bClass10Strength: dataItem.strength10,
+        b2b10thFee: dataItem.fee10,
+        b2bDecisionMakerName: dataItem.decesionMakerName,
+        b2bDecisionMakerMobile: dataItem.decesionMakerNumber,
+        nextMeetDate: dataItem.meetingDate,
+        nextMeetTime: dataItem.meetingTime,
+        b2bResidential: dataItem.residentialCampus,
+        b2b8910Foundation: dataItem.foundation8910,
+        b2bInfrastructure: dataItem.infrastructure,
+        leadId: dataItem.id,
+        status: dataItem.status
+      });
+    } else {
+      this.setState({
+        leadId: dataItem.id,
+        leadType: 1,
+        status: dataItem.status,
+        b2cStudentName: dataItem.studentName,
+        b2cGuardianName: dataItem.gaurdianName,
+        b2cStudentMobile1: dataItem.mobile1,
+        b2cStudentMobile2: dataItem.mobile2,
+        b2cStudentClass: dataItem.divisionClass,
+        b2cSchoolName: dataItem.schoolOrCollege,
+        b2cSchoolEmail: dataItem.email,
+        b2cSchoolAddress: dataItem.address,
+        b2cCity: dataItem.city,
+        b2cState: dataItem.state,
+        b2cFinancialStatus: dataItem.financialStatus,
+        b2cPrincipalName: dataItem.principalName,
+        b2cPrincipalMobile: dataItem.mobile,
+        b2c8910foundation: dataItem.foundation8910,
+        b2cCoaching: dataItem.coaching
+      });
+    }
   }
+
   pickDate = async () => {
     try {
       const { action, year, month, day } = await DatePickerAndroid.open({
@@ -137,10 +188,10 @@ export default class ViewLead extends Component {
       if (action !== TimePickerAndroid.dismissedAction) {
         // Selected hour (0-23), minute (0-59)
 
-        let tempMinutes = "";
-        let tempHour = "";
+        let tempMinutes = "" + minute;
+        let tempHour = "" + hour;
         if (parseInt(minute) < 10) {
-          tempMinutes = "0" + minute;
+          tempMinutes = "0" + tempMinutes;
         }
         if (parseInt(hour) >= 12) {
           tempHour = parseInt(hour) - 12;
@@ -155,6 +206,119 @@ export default class ViewLead extends Component {
       console.warn("Cannot open time picker", message);
     }
   };
+  editB2BLeadAPI = () => {
+    console.log("In editb2bLeadApi");
+    fetch(EditB2BLeadURL, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        school: this.state.b2bschoolName,
+        city: this.state.b2bCity,
+        districtName: this.state.b2bDistrict,
+        state: this.state.b2bState,
+        principleName: this.state.b2bPrincipalName,
+        mobile1: this.state.b2bPrincipalMobile1,
+        mobile2: this.state.b2bPrincipalMobile2,
+        email: this.state.b2bPrincipalEmail,
+        contactPersonName: this.state.b2bContactPersonName,
+        mobile: this.state.b2bContactPersonMobile,
+        strength11: this.state.b2bClass11Strength,
+        strength12: this.state.b2bClass12Strength,
+        fee11: this.state.b2b11thFee,
+        fee10: this.state.b2b10thFee,
+        strength10: this.state.b2bClass10Strength,
+        decesionMakerName: this.state.b2bDecisionMakerName,
+        decesionMakerNumber: this.state.b2bDecisionMakerMobile,
+        meetingDate: this.state.nextMeetDate,
+        meetingTime: this.state.nextMeetTime,
+        residentialCampus: this.state.b2bResidential,
+        foundation8910: this.state.b2b8910Foundation,
+        infrastructure: this.state.b2bInfrastructure,
+        remark: this.state.b2bRemarks,
+        leadId: this.state.leadId,
+        status: this.state.status
+      })
+    })
+      .then(data => {
+        return data.json();
+      })
+      .then(data => {
+        console.log("EditLead Response", data);
+
+        if (data.message == "succesfully updated") {
+          //this._storeData(data.userId);
+          Alert.alert("Lead Edited Successfully");
+          this.props.navigation.navigate("DashBoard");
+        } else if (data.message) {
+          Alert.alert("Invalid Username or Password");
+        }
+      })
+      .catch(error => {
+        console.log("Api call error");
+        console.log(error.message);
+      });
+  };
+
+  editB2CLeadAPI = () => {
+    console.log("In Editb2cLeadApi");
+    fetch(EditB2CLeadURL, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        studentName: this.state.b2cStudentName,
+        gaurdianName: this.state.b2cGuardianName,
+        mobile1: this.state.b2cStudentMobile1,
+        mobile2: this.state.b2cStudentMobile2,
+        divisionClass: b2cClass_props.find(item => {
+          if (item.value === this.state.b2cStudentClass) return item;
+        }).label,
+        schoolOrCollege: this.state.b2cSchoolName,
+        email: this.state.b2cSchoolEmail,
+        address: this.state.b2cSchoolAddress,
+        city: this.state.b2cCity,
+        state: this.state.b2cState,
+        financialStatus: this.state.b2cFinancialStatus,
+        principalName: this.state.b2cPrincipalName,
+        mobile: this.state.b2cPrincipalMobile,
+        //coaching: this.state.b2cCoaching,
+        foundation8910: this.state.b2c8910foundation,
+        status: this.state.status,
+        leadId: this.state.leadId
+      })
+    })
+      .then(data => {
+        return data.json();
+      })
+      .then(data => {
+        //console.log("AddLead Response", data);
+
+        if (data.message == "succesfully updated") {
+          //this._storeData(data.userId);
+          Alert.alert("Lead Edited Successfully");
+          this.props.navigation.navigate("DashBoard");
+        } else if (data.message) {
+          Alert.alert(data.message);
+        }
+      })
+      .catch(error => {
+        console.log("Api call error");
+        console.log(error.message);
+      });
+  };
+  editLead() {
+    if (this.state.leadType == 0) {
+      this.editB2BLeadAPI();
+    } else {
+      this.editB2CLeadAPI();
+    }
+    //console.log("Call Edit");
+  }
   render() {
     return (
       <View style={styles.container}>
@@ -163,9 +327,17 @@ export default class ViewLead extends Component {
             <NameText>Select Status</NameText>
             <RadioForm
               radio_props={radio_props}
-              initial={this.state.status}
+              initial={
+                radio_props.find(item => {
+                  if (item.label === this.state.status) return item;
+                }).value
+              }
               onPress={value => {
-                this.setState({ status: value });
+                let temp = radio_props.find(item => {
+                  if (item.value === value) return item;
+                }).label;
+
+                this.setState({ status: temp });
               }}
               formHorizontal={false}
               labelHorizontal={true}
@@ -175,7 +347,10 @@ export default class ViewLead extends Component {
               buttonSize={10}
               buttonOuterSize={20}
             />
-            <TouchableOpacity style={styles.buttonContainer} onPress={() => {}}>
+            <TouchableOpacity
+              style={styles.buttonContainer}
+              onPress={() => this.editLead()}
+            >
               <Text style={styles.buttonText}>SAVE CHANGES</Text>
             </TouchableOpacity>
           </View>
@@ -603,6 +778,9 @@ export default class ViewLead extends Component {
                 <TouchableOpacity
                   style={styles.buttonContainer}
                   onPress={() => {
+                    if (this.state.editable) {
+                      this.editLead();
+                    }
                     this.setState({ editable: !this.state.editable });
                   }}
                 >
@@ -905,6 +1083,9 @@ export default class ViewLead extends Component {
                 <TouchableOpacity
                   style={styles.buttonContainer}
                   onPress={() => {
+                    if (this.state.editable) {
+                      this.editLead();
+                    }
                     this.setState({ editable: !this.state.editable });
                   }}
                 >

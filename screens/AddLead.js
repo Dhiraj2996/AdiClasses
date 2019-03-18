@@ -7,7 +7,9 @@ import {
   ScrollView,
   TextInput,
   DatePickerAndroid,
-  TimePickerAndroid
+  TimePickerAndroid,
+  Alert,
+  AsyncStorage
 } from "react-native";
 import styled from "styled-components";
 import RadioForm, {
@@ -16,6 +18,7 @@ import RadioForm, {
   RadioButtonLabel
 } from "react-native-simple-radio-button";
 import { CheckBox } from "react-native-elements";
+import { AddB2BLead, AddB2CLead } from "../assests/ApiUrl";
 
 var leadType_props = [{ label: "B2B", value: 0 }, { label: "B2C", value: 1 }];
 
@@ -46,20 +49,57 @@ var b2cClass_props = [
 export default class AddLead extends Component {
   state = {
     leadType: 0,
-    strength: "",
-    residentialCampus: 0,
-    scholar: 0,
-    foundation: 0,
-    infrastructure: 0,
-    decisionMaker: "",
-    studentFinanceStatus: 0,
-    b2cClass: 0,
+    loginID: "",
+
     CETchecked: false,
     NEETchecked: false,
     IITchecked: false,
     Advancedchecked: false,
+
+    b2bschoolName: "",
+    b2bCity: "",
+    b2bDistrict: "",
+    b2bState: "",
+    b2bPrincipalName: "",
+    b2bPrincipalMobile1: "",
+    b2bPrincipalMobile2: "",
+    b2bPrincipalEmail: "",
+    b2bContactPersonName: "",
+    b2bContactPersonMobile: "",
+    b2bClass12Strength: "",
+    b2bClass11Strength: "",
+    b2b11thFee: "",
+    b2bClass10Strength: "",
+    b2b10thFee: "",
+    b2bDecisionMakerName: "",
+    b2bDecisionMakerMobile: "",
     nextMeetDate: "",
-    nextMeetTime: ""
+    nextMeetTime: "",
+    b2bResidential: 0,
+    b2b8910Foundation: 0,
+    b2bInfrastructure: 0,
+    b2bRemarks: "",
+
+    b2cStudentName: "",
+    b2cGuardianName: "",
+    b2cStudentMobile1: "",
+    b2cStudentMobile2: "",
+    b2cStudentClass: 0,
+    b2cStudentEmail: "",
+    b2cSchoolName: "",
+    b2cSchoolEmail: "",
+    b2cSchoolAddress: "",
+    b2cCity: "",
+    b2cState: "",
+    b2cFinancialStatus: 0,
+    b2cPrincipalName: "",
+    b2cPrincipalMobile: "",
+    b2c8910foundation: 0,
+    b2cCoaching: ""
+  };
+
+  componentDidMount = () => {
+    this._retrieveData();
   };
 
   pickDate = async () => {
@@ -88,16 +128,14 @@ export default class AddLead extends Component {
       });
       if (action !== TimePickerAndroid.dismissedAction) {
         // Selected hour (0-23), minute (0-59)
-        let tempMinutes = "";
-        let tempHour = "";
+
+        let tempMinutes = "" + minute;
+        let tempHour = "" + hour;
         if (parseInt(minute) < 10) {
-          tempMinutes = "0" + minute;
+          tempMinutes = "0" + tempMinutes;
         }
         if (parseInt(hour) >= 12) {
           tempHour = parseInt(hour) - 12;
-          if (parseInt(tempHour) < 10) {
-            tempHour = "" + "0" + tempHour;
-          }
           temp = tempHour + ":" + tempMinutes + " pm";
         } else {
           temp = tempHour + ":" + tempMinutes + " am";
@@ -108,6 +146,154 @@ export default class AddLead extends Component {
     } catch ({ code, message }) {
       console.warn("Cannot open time picker", message);
     }
+  };
+  _retrieveData = async () => {
+    try {
+      const value = await AsyncStorage.getItem("userId");
+      this.setState({ loginID: value });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  AddB2BLeadAPI = () => {
+    console.log("In Addb2bLeadApi");
+    fetch(AddB2BLead, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        school: this.state.b2bschoolName,
+        city: this.state.b2bCity,
+        districtName: this.state.b2bDistrict,
+        state: this.state.b2bState,
+        principleName: this.state.b2bPrincipalName,
+        mobile1: this.state.b2bPrincipalMobile1,
+        mobile2: this.state.b2bPrincipalMobile2,
+        email: this.state.b2bPrincipalEmail,
+        contactPersonName: this.state.b2bContactPersonName,
+        mobile: this.state.b2bContactPersonMobile,
+        strength11: this.state.b2bClass11Strength,
+        strength12: this.state.b2bClass12Strength,
+        fee11: this.state.b2b11thFee,
+        fee10: this.state.b2b10thFee,
+        strength10: this.state.b2bClass10Strength,
+        decesionMakerName: this.state.b2bDecisionMakerName,
+        decesionMakerNumber: this.state.b2bDecisionMakerMobile,
+        meetingDate: this.state.nextMeetDate,
+        meetingTime: this.state.nextMeetTime,
+        residentialCampus: foundation_props.find(item => {
+          if (item.value === this.state.b2bResidential) return item;
+        }).label,
+        foundation8910: foundation_props.find(item => {
+          if (item.value === this.state.b2b8910Foundation) return item;
+        }).label,
+        infrastructure: infrastucture_props.find(item => {
+          if (item.value === this.state.b2bInfrastructure) return item;
+        }).label,
+        remark: this.state.b2bRemarks,
+        loginID: this.state.loginID
+      })
+    })
+      .then(data => {
+        return data.json();
+      })
+      .then(data => {
+        console.log("AddLead Response", data);
+
+        if (data.message == "Lead Added") {
+          //this._storeData(data.userId);
+          Alert.alert("Lead Added Successfully");
+          this.props.navigation.navigate("DashBoard");
+        } else if (data.message) {
+          Alert.alert("Invalid Username or Password");
+        }
+      })
+      .catch(error => {
+        console.log("Api call error");
+        console.log(error.message);
+      });
+  };
+
+  CallAddB2BLead = () => {
+    //Provide check for field validations here
+    if (this.state.b2bschoolName == "") {
+      Alert.alert("Please fill all Fields!");
+    }
+    this.AddB2BLeadAPI();
+  };
+
+  AddB2CLeadAPI = () => {
+    console.log("In Addb2cLeadApi");
+    fetch(AddB2CLead, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        loginID: this.state.loginID,
+        studentName: this.state.b2cStudentName,
+        gaurdianName: this.state.b2cGuardianName,
+        mobile1: this.state.b2cStudentMobile1,
+        mobile2: this.state.b2cStudentMobile2,
+        divisionClass: b2cClass_props.find(item => {
+          if (item.value === this.state.b2cStudentClass) return item;
+        }).label,
+        schoolOrCollege: this.state.b2cSchoolName,
+        email: this.state.b2cSchoolEmail,
+        address: this.state.b2cSchoolAddress,
+        city: this.state.b2cCity,
+        state: this.state.b2cState,
+        financialStatus: studentFinanceStatus_props.find(item => {
+          if (item.value === this.state.b2cFinancialStatus) return item;
+        }).label,
+        principalName: this.state.b2cPrincipalName,
+        mobile: this.state.b2cPrincipalMobile,
+        coaching: this.state.b2cCoaching,
+        foundation8910: foundation_props.find(item => {
+          if (item.value === this.state.b2c8910foundation) return item;
+        }).label
+      })
+    })
+      .then(data => {
+        return data.json();
+      })
+      .then(data => {
+        //console.log("AddLead Response", data);
+
+        if (data.message == "Lead Added") {
+          //this._storeData(data.userId);
+          Alert.alert("Lead Added Successfully");
+          this.props.navigation.navigate("DashBoard");
+        } else if (data.message) {
+          Alert.alert(data.message);
+        }
+      })
+      .catch(error => {
+        console.log("Api call error");
+        console.log(error.message);
+      });
+  };
+
+  CallAddB2CLead = () => {
+    let tempCoaching = "";
+    if (this.state.CETchecked) {
+      tempCoaching += "CET,";
+    }
+    if (this.state.NEETchecked) {
+      tempCoaching = "NEET,";
+    }
+    if (this.state.IITchecked) {
+      tempCoaching += "IIT,";
+    }
+    if (this.state.Advancedchecked) {
+      tempCoaching += "Advanced,";
+    }
+
+    this.setState({ b2cCoaching: tempCoaching });
+    this.AddB2CLeadAPI();
   };
   render() {
     return (
@@ -137,6 +323,7 @@ export default class AddLead extends Component {
                 returnKeyType="next"
                 placeholder="School/College Name"
                 placeholderTextColor="rgba(225,225,225,0.7)"
+                onChangeText={text => this.setState({ b2bschoolName: text })}
               />
               <TextInput
                 style={styles.input}
@@ -147,6 +334,7 @@ export default class AddLead extends Component {
                 returnKeyType="next"
                 placeholder="City/Town"
                 placeholderTextColor="rgba(225,225,225,0.7)"
+                onChangeText={text => this.setState({ b2bCity: text })}
               />
               <TextInput
                 style={styles.input}
@@ -157,6 +345,7 @@ export default class AddLead extends Component {
                 returnKeyType="next"
                 placeholder="District"
                 placeholderTextColor="rgba(225,225,225,0.7)"
+                onChangeText={text => this.setState({ b2bDistrict: text })}
               />
               <TextInput
                 style={styles.input}
@@ -167,6 +356,7 @@ export default class AddLead extends Component {
                 returnKeyType="next"
                 placeholder="State"
                 placeholderTextColor="rgba(225,225,225,0.7)"
+                onChangeText={text => this.setState({ b2bState: text })}
               />
               <TextInput
                 style={styles.input}
@@ -177,6 +367,7 @@ export default class AddLead extends Component {
                 returnKeyType="next"
                 placeholder="Principal Name"
                 placeholderTextColor="rgba(225,225,225,0.7)"
+                onChangeText={text => this.setState({ b2bPrincipalName: text })}
               />
               <TextInput
                 style={styles.input}
@@ -187,6 +378,9 @@ export default class AddLead extends Component {
                 returnKeyType="next"
                 placeholder="Mobile 1"
                 placeholderTextColor="rgba(225,225,225,0.7)"
+                onChangeText={text =>
+                  this.setState({ b2bPrincipalMobile1: text })
+                }
               />
               <TextInput
                 style={styles.input}
@@ -197,6 +391,9 @@ export default class AddLead extends Component {
                 returnKeyType="next"
                 placeholder="Mobile 2"
                 placeholderTextColor="rgba(225,225,225,0.7)"
+                onChangeText={text =>
+                  this.setState({ b2bPrincipalMobile2: text })
+                }
               />
               <TextInput
                 style={styles.input}
@@ -207,6 +404,9 @@ export default class AddLead extends Component {
                 returnKeyType="next"
                 placeholder="Email"
                 placeholderTextColor="rgba(225,225,225,0.7)"
+                onChangeText={text =>
+                  this.setState({ b2bPrincipalEmail: text })
+                }
               />
               <TextInput
                 style={styles.input}
@@ -217,6 +417,9 @@ export default class AddLead extends Component {
                 returnKeyType="next"
                 placeholder="Contact Person"
                 placeholderTextColor="rgba(225,225,225,0.7)"
+                onChangeText={text =>
+                  this.setState({ b2bContactPersonName: text })
+                }
               />
               <TextInput
                 style={styles.input}
@@ -227,6 +430,9 @@ export default class AddLead extends Component {
                 returnKeyType="next"
                 placeholder="Mobile "
                 placeholderTextColor="rgba(225,225,225,0.7)"
+                onChangeText={text =>
+                  this.setState({ b2bContactPersonMobile: text })
+                }
               />
               <TextInput
                 style={styles.input}
@@ -237,6 +443,9 @@ export default class AddLead extends Component {
                 returnKeyType="next"
                 placeholder="12th Class Strength "
                 placeholderTextColor="rgba(225,225,225,0.7)"
+                onChangeText={text =>
+                  this.setState({ b2bClass12Strength: text })
+                }
               />
               <TextInput
                 style={styles.input}
@@ -247,6 +456,9 @@ export default class AddLead extends Component {
                 returnKeyType="next"
                 placeholder="11th Class Strength "
                 placeholderTextColor="rgba(225,225,225,0.7)"
+                onChangeText={text =>
+                  this.setState({ b2bClass12Strength: text })
+                }
               />
               <TextInput
                 style={styles.input}
@@ -257,6 +469,7 @@ export default class AddLead extends Component {
                 returnKeyType="next"
                 placeholder="Fee"
                 placeholderTextColor="rgba(225,225,225,0.7)"
+                onChangeText={text => this.setState({ b2b11thFee: text })}
               />
               <TextInput
                 style={styles.input}
@@ -267,6 +480,9 @@ export default class AddLead extends Component {
                 returnKeyType="next"
                 placeholder="10th Class Strength "
                 placeholderTextColor="rgba(225,225,225,0.7)"
+                onChangeText={text =>
+                  this.setState({ b2bClass10Strength: text })
+                }
               />
               <TextInput
                 style={styles.input}
@@ -277,6 +493,7 @@ export default class AddLead extends Component {
                 returnKeyType="next"
                 placeholder="Fee"
                 placeholderTextColor="rgba(225,225,225,0.7)"
+                onChangeText={text => this.setState({ b2b10thFee: text })}
               />
               <TextInput
                 style={styles.input}
@@ -287,6 +504,9 @@ export default class AddLead extends Component {
                 returnKeyType="next"
                 placeholder="Decision Maker Name"
                 placeholderTextColor="rgba(225,225,225,0.7)"
+                onChangeText={text =>
+                  this.setState({ b2bDecisionMakerName: text })
+                }
               />
               <TextInput
                 style={styles.input}
@@ -297,6 +517,9 @@ export default class AddLead extends Component {
                 returnKeyType="next"
                 placeholder="Mobile "
                 placeholderTextColor="rgba(225,225,225,0.7)"
+                onChangeText={text =>
+                  this.setState({ b2bDecisionMakerMobile: text })
+                }
               />
               <View style={styles.flexColumn}>
                 <NameText style={{ color: "#fff", fontSize: 24 }}>
@@ -367,9 +590,9 @@ export default class AddLead extends Component {
                 </NameText>
                 <RadioForm
                   radio_props={foundation_props}
-                  initial={this.state.residentialCampus}
+                  initial={this.state.b2bResidential}
                   onPress={value => {
-                    this.setState({ residentialCampus: value });
+                    this.setState({ b2bResidential: value });
                   }}
                   formHorizontal={false}
                   labelHorizontal={true}
@@ -387,9 +610,9 @@ export default class AddLead extends Component {
                 </NameText>
                 <RadioForm
                   radio_props={foundation_props}
-                  initial={this.state.foundation}
+                  initial={this.state.b2b8910Foundation}
                   onPress={value => {
-                    this.setState({ foundation: value });
+                    this.setState({ b2b8910Foundation: value });
                   }}
                   formHorizontal={false}
                   labelHorizontal={true}
@@ -407,9 +630,9 @@ export default class AddLead extends Component {
                 </NameText>
                 <RadioForm
                   radio_props={infrastucture_props}
-                  initial={this.state.infrastructure}
+                  initial={this.state.b2bInfrastructure}
                   onPress={value => {
-                    this.setState({ infrastructure: value });
+                    this.setState({ b2bInfrastructure: value });
                   }}
                   formHorizontal={false}
                   labelHorizontal={true}
@@ -431,13 +654,12 @@ export default class AddLead extends Component {
                   keyboardType="default"
                   returnKeyType="next"
                   multiline={true}
+                  onChangeText={text => this.setState({ b2bRemarks: text })}
                 />
               </View>
               <TouchableOpacity
                 style={styles.buttonContainer}
-                onPress={() => {
-                  console.log("Button Pressed");
-                }}
+                onPress={() => this.CallAddB2BLead()}
               >
                 <Text style={styles.buttonText}>Add Lead</Text>
               </TouchableOpacity>
@@ -453,6 +675,9 @@ export default class AddLead extends Component {
                 returnKeyType="next"
                 placeholder="Student Name"
                 placeholderTextColor="rgba(225,225,225,0.7)"
+                onChangeText={text => {
+                  this.setState({ b2cStudentName: text });
+                }}
               />
               <TextInput
                 style={styles.input}
@@ -463,6 +688,9 @@ export default class AddLead extends Component {
                 returnKeyType="next"
                 placeholder="Guardian Name"
                 placeholderTextColor="rgba(225,225,225,0.7)"
+                onChangeText={text => {
+                  this.setState({ b2cGuardianName: text });
+                }}
               />
               <TextInput
                 style={styles.input}
@@ -473,6 +701,9 @@ export default class AddLead extends Component {
                 returnKeyType="next"
                 placeholder="Mobile 1"
                 placeholderTextColor="rgba(225,225,225,0.7)"
+                onChangeText={text => {
+                  this.setState({ b2cStudentMobile1: text });
+                }}
               />
               <TextInput
                 style={styles.input}
@@ -483,6 +714,9 @@ export default class AddLead extends Component {
                 returnKeyType="next"
                 placeholder="Mobile 2"
                 placeholderTextColor="rgba(225,225,225,0.7)"
+                onChangeText={text => {
+                  this.setState({ b2cStudentMobile2: text });
+                }}
               />
               <View style={styles.flexColumn}>
                 <NameText style={{ color: "#fff", fontSize: 24 }}>
@@ -490,9 +724,9 @@ export default class AddLead extends Component {
                 </NameText>
                 <RadioForm
                   radio_props={b2cClass_props}
-                  initial={this.state.b2cClass}
+                  initial={this.state.b2cStudentClass}
                   onPress={value => {
-                    this.setState({ b2cClass: value });
+                    this.setState({ b2cStudentClass: value });
                   }}
                   formHorizontal={false}
                   labelHorizontal={true}
@@ -513,6 +747,9 @@ export default class AddLead extends Component {
                 returnKeyType="next"
                 placeholder="School/College Name"
                 placeholderTextColor="rgba(225,225,225,0.7)"
+                onChangeText={text => {
+                  this.setState({ b2cSchoolName: text });
+                }}
               />
               <TextInput
                 style={styles.input}
@@ -523,6 +760,9 @@ export default class AddLead extends Component {
                 returnKeyType="next"
                 placeholder="Email Address"
                 placeholderTextColor="rgba(225,225,225,0.7)"
+                onChangeText={text => {
+                  this.setState({ b2cSchoolEmail: text });
+                }}
               />
               <TextInput
                 style={styles.input}
@@ -534,6 +774,9 @@ export default class AddLead extends Component {
                 returnKeyType="next"
                 placeholder="Address"
                 placeholderTextColor="rgba(225,225,225,0.7)"
+                onChangeText={text => {
+                  this.setState({ b2cSchoolAddress: text });
+                }}
               />
               <TextInput
                 style={styles.input}
@@ -544,6 +787,9 @@ export default class AddLead extends Component {
                 returnKeyType="next"
                 placeholder="City"
                 placeholderTextColor="rgba(225,225,225,0.7)"
+                onChangeText={text => {
+                  this.setState({ b2cCity: text });
+                }}
               />
               <TextInput
                 style={styles.input}
@@ -554,6 +800,9 @@ export default class AddLead extends Component {
                 returnKeyType="next"
                 placeholder="State"
                 placeholderTextColor="rgba(225,225,225,0.7)"
+                onChangeText={text => {
+                  this.setState({ b2cState: text });
+                }}
               />
               <View style={styles.flexColumn}>
                 <NameText style={{ color: "#fff", fontSize: 24 }}>
@@ -561,9 +810,9 @@ export default class AddLead extends Component {
                 </NameText>
                 <RadioForm
                   radio_props={studentFinanceStatus_props}
-                  initial={this.state.studentFinanceStatus}
+                  initial={this.state.b2cFinancialStatus}
                   onPress={value => {
-                    this.setState({ studentFinanceStatus: value });
+                    this.setState({ b2cFinancialStatus: value });
                   }}
                   formHorizontal={false}
                   labelHorizontal={true}
@@ -584,6 +833,9 @@ export default class AddLead extends Component {
                 returnKeyType="next"
                 placeholder="Principal Name"
                 placeholderTextColor="rgba(225,225,225,0.7)"
+                onChangeText={text => {
+                  this.setState({ b2cPrincipalName: text });
+                }}
               />
               <TextInput
                 style={styles.input}
@@ -594,6 +846,9 @@ export default class AddLead extends Component {
                 returnKeyType="next"
                 placeholder="Mobile"
                 placeholderTextColor="rgba(225,225,225,0.7)"
+                onChangeText={text => {
+                  this.setState({ b2cPrincipalMobile: text });
+                }}
               />
               <View style={styles.flexColumn}>
                 <NameText style={{ color: "#fff", fontSize: 24 }}>
@@ -601,9 +856,9 @@ export default class AddLead extends Component {
                 </NameText>
                 <RadioForm
                   radio_props={foundation_props}
-                  initial={this.state.foundation}
+                  initial={this.state.b2c8910foundation}
                   onPress={value => {
-                    this.setState({ foundation: value });
+                    this.setState({ b2c8910foundation: value });
                   }}
                   formHorizontal={false}
                   labelHorizontal={true}
@@ -651,9 +906,7 @@ export default class AddLead extends Component {
               </View>
               <TouchableOpacity
                 style={styles.buttonContainer}
-                onPress={() => {
-                  console.log("Button Pressed");
-                }}
+                onPress={() => this.CallAddB2CLead()}
               >
                 <Text style={styles.buttonText}>Add Lead</Text>
               </TouchableOpacity>

@@ -5,14 +5,30 @@ import {
   View,
   TouchableOpacity,
   Button,
-  Alert
+  Alert,
+  AsyncStorage
 } from "react-native";
 import styled from "styled-components";
+import { GetB2BList, GetB2CList } from "../assests/ApiUrl";
 
-export default class HomeScreen extends Component {
+b2bUnverified = [];
+b2bVerified = [];
+b2bDead = [];
+b2bFollowup = [];
+b2bAppointmentFixed = [];
+b2bAppointmentDone = [];
+
+b2cUnverified = [];
+b2cVerified = [];
+b2cDead = [];
+b2cFollowup = [];
+b2cAppointmentFixed = [];
+b2cAppointmentDone = [];
+
+export default class DashBoard extends Component {
   static navigationOptions = ({ navigation }) => {
     return {
-      title: "Hi,Dhananjay!",
+      title: "Hi," + navigation.getParam("userName") + "!",
       headerRight: (
         <Button
           onPress={() => {
@@ -24,43 +40,185 @@ export default class HomeScreen extends Component {
       )
     };
   };
+  state = {
+    verifiedCount: 0,
+    unverifiedCount: 0,
+    deadCount: 0,
+    followupCount: 0,
+    appointmentFixedCount: 0,
+    appointmentDoneCount: 0,
+    userId: ""
+  };
+
+  componentDidMount = async () => {
+    const value = await AsyncStorage.getItem("userId");
+    console.log("UserId:" + value);
+    this.setState({ userId: value });
+    this.refreshDashBoard(value);
+    this.willFocusSubscription = this.props.navigation.addListener(
+      "willFocus",
+      () => this.refreshDashBoard(this.state.userId)
+    );
+  };
+  refreshDashBoard = value => {
+    this.getB2BListAPI(value);
+    this.getB2CListAPI(value);
+  };
+  getB2BListAPI = userId => {
+    fetch(GetB2BList, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        loginId: userId
+      })
+    })
+      .then(data => {
+        return data.json();
+      })
+      .then(data => {
+        // console.log("B2BList:", data);
+
+        if (data.message == "Data available") {
+          //this._storeData(data.userId);
+          console.log(data.message);
+          b2bUnverified = data.records.filter(lead => {
+            if (lead.status == "unverified") return lead;
+          });
+          b2bVerified = data.records.filter(lead => {
+            if (lead.status == "verified") return lead;
+          });
+          b2bDead = data.records.filter(lead => {
+            if (lead.status == "followup") return lead;
+          });
+          b2bFollowup = data.records.filter(lead => {
+            if (lead.status == "appointment fixed") return lead;
+          });
+          b2bAppointmentFixed = data.records.filter(lead => {
+            if (lead.status == "appointment fixed") return lead;
+          });
+          b2bAppointmentDone = data.records.filter(lead => {
+            if (lead.status == "appointment done") return lead;
+          });
+
+          this.setCount();
+        } else if (data.message) {
+          console.log(data.message);
+        }
+      })
+      .catch(error => {
+        console.log("Api call error");
+        console.log(error.message);
+      });
+  };
+  getB2CListAPI = userId => {
+    fetch(GetB2CList, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        loginId: userId
+      })
+    })
+      .then(data => {
+        return data.json();
+      })
+      .then(data => {
+        //  console.log("B2CList:", data);
+
+        if (data.message == "Data available") {
+          //this._storeData(data.userId);
+          console.log(data.message);
+          b2cUnverified = data.records.filter(lead => {
+            if (lead.status == "unverified") return lead;
+          });
+          b2cVerified = data.records.filter(lead => {
+            if (lead.status == "verified") return lead;
+          });
+          b2cDead = data.records.filter(lead => {
+            if (lead.status == "followup") return lead;
+          });
+          b2cFollowup = data.records.filter(lead => {
+            if (lead.status == "appointment fixed") return lead;
+          });
+          b2cAppointmentFixed = data.records.filter(lead => {
+            if (lead.status == "appointment fixed") return lead;
+          });
+          b2cAppointmentDone = data.records.filter(lead => {
+            if (lead.status == "appointment done") return lead;
+          });
+          this.setCount();
+        } else if (data.message) {
+          console.log(data.message);
+        }
+      })
+      .catch(error => {
+        console.log("Api call error");
+        console.log(error.message);
+      });
+  };
+  componentWillUnmount() {
+    this.willFocusSubscription.remove();
+  }
+  setCount = () => {
+    this.setState({
+      verifiedCount: b2bVerified.length + b2cVerified.length,
+      unverifiedCount: b2bUnverified.length + b2cUnverified.length,
+      deadCount: b2bDead.length + b2cDead.length,
+      followupCount: b2bFollowup.length + b2cFollowup.length,
+      appointmentFixedCount:
+        b2bAppointmentFixed.length + b2cAppointmentFixed.length,
+      appointmentDoneCount:
+        b2bAppointmentDone.length + b2cAppointmentDone.length
+    });
+  };
   render() {
     return (
       <View style={styles.container}>
         <View style={styles.flexRow}>
           <DashBoardCard
-            label="VERIFIED"
-            value={5}
+            label="UNVERIFIED"
+            value={this.state.unverifiedCount}
             navigation={this.props.navigation}
+            datalist={b2bUnverified.concat(b2cUnverified)}
           />
           <DashBoardCard
-            label="UNVERIFIED"
-            value={10}
+            label="VERIFIED"
+            value={this.state.verifiedCount}
             navigation={this.props.navigation}
+            datalist={b2bVerified.concat(b2cVerified)}
           />
         </View>
         <View style={styles.flexRow}>
           <DashBoardCard
             label="DEAD"
-            value={2}
+            value={this.state.deadCount}
             navigation={this.props.navigation}
+            datalist={b2bDead.concat(b2cDead)}
           />
           <DashBoardCard
             label="FOLLOW-UP"
-            value={3}
+            value={this.state.followupCount}
             navigation={this.props.navigation}
+            datalist={b2bFollowup.concat(b2cFollowup)}
           />
         </View>
         <View style={styles.flexRow}>
           <DashBoardCard
             label="Appointment Fixed"
-            value={5}
+            value={this.state.appointmentFixedCount}
             navigation={this.props.navigation}
+            datalist={b2bAppointmentFixed.concat(b2cAppointmentFixed)}
           />
           <DashBoardCard
             label="Appointment Done"
-            value={10}
+            value={this.state.appointmentDoneCount}
             navigation={this.props.navigation}
+            datalist={b2bAppointmentDone.concat(b2cAppointmentDone)}
           />
         </View>
         <View style={{ flex: 0.5 }} />
@@ -83,8 +241,11 @@ class DashBoardCard extends Component {
       <TouchableOpacity
         style={styles.card}
         onPress={() => {
+          //console.log("this.props.datalist: " + this.props.datalist);
+          //this.props.datalist.map(item => console.log(item));
           this.props.navigation.navigate("StatusList", {
-            pageTitle: this.props.label
+            pageTitle: this.props.label,
+            datalist: this.props.datalist
           });
         }}
       >
