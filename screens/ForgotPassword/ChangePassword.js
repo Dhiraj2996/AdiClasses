@@ -4,12 +4,61 @@ import {
   Text,
   View,
   TouchableOpacity,
-  TextInput
+  TextInput,
+  Alert
 } from "react-native";
+import { ChangePasswordURL } from "../../assests/ApiUrl";
 
 export default class ChangePassword extends Component {
   state = {
-    mobile: ""
+    mobile: "",
+    password1: "",
+    password2: ""
+  };
+
+  componentDidMount() {
+    this.password1Input.focus();
+    let mob = this.props.navigation.getParam("mobile");
+    console.log("mob::" + mob);
+    this.setState({ mobile: mob });
+  }
+  ChangePasswordApi = () => {
+    console.log("In ChangePasswordApi");
+    if (this.state.password1.length < 5) {
+      Alert.alert("Password must be atleast 5 characters long!");
+      return;
+    }
+    if (this.state.password1 != this.state.password2) {
+      Alert.alert("Passwords do not match!");
+      return;
+    }
+    fetch(ChangePasswordURL, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        u_number: this.state.mobile,
+        U_pass: this.state.password1
+      })
+    })
+      .then(data => {
+        return data.json();
+      })
+      .then(data => {
+        console.log("ChangePassword Response", data);
+        if (data.message == "password updated succesfully") {
+          Alert.alert("Password Updated Successfully!");
+          this.props.navigation.navigate("Login");
+        } else {
+          Alert.alert(data.message);
+        }
+      })
+      .catch(error => {
+        console.log("Api call error");
+        console.log(error.message);
+      });
   };
   render() {
     return (
@@ -17,27 +66,36 @@ export default class ChangePassword extends Component {
         <TextInput
           style={styles.input}
           autoCapitalize="none"
-          onSubmitEditing={() => this.passwordInput.focus()}
+          onSubmitEditing={() => this.password2Input.focus()}
+          ref={input => (this.password1Input = input)}
           autoCorrect={false}
           keyboardType="default"
           returnKeyType="next"
           placeholder="New Password"
           placeholderTextColor="rgba(225,225,225,0.7)"
+          secureTextEntry
+          onChangeText={text => {
+            this.setState({ password1: text });
+          }}
         />
         <TextInput
           style={styles.input}
           autoCapitalize="none"
-          onSubmitEditing={() => this.passwordInput.focus()}
           autoCorrect={false}
+          ref={input => (this.password2Input = input)}
           keyboardType="default"
           returnKeyType="next"
           placeholder="Re-enter Password"
           placeholderTextColor="rgba(225,225,225,0.7)"
+          secureTextEntry
+          onChangeText={text => {
+            this.setState({ password2: text });
+          }}
         />
         <TouchableOpacity
           style={styles.buttonContainer}
           onPress={() => {
-            this.props.navigation.navigate("Login");
+            this.ChangePasswordApi();
           }}
         >
           <Text style={styles.buttonText}>Change Password</Text>

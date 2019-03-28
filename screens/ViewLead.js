@@ -58,41 +58,41 @@ export default class ViewLead extends Component {
     leadId: 0,
     status: "unverified",
 
-    b2bschoolName: "My School Name",
-    b2bCity: "Pune",
-    b2bDistrict: "Pune",
-    b2bState: "Maharastra",
-    b2bPrincipalName: "Qwerty",
-    b2bPrincipalMobile1: "987654321",
-    b2bPrincipalMobile2: "9870654321",
-    b2bPrincipalEmail: "iamprincipal@school.com",
-    b2bContactPersonName: "Shyam",
-    b2bContactPersonMobile: "1231231231",
-    b2bClass12Strength: "200",
-    b2bClass11Strength: "300",
-    b2b11thFee: "5000",
-    b2bClass10Strength: "300",
-    b2b10thFee: "5000",
-    b2bDecisionMakerName: "Rajesh",
-    b2bDecisionMakerMobile: "4564564564",
+    b2bschoolName: "",
+    b2bCity: "",
+    b2bDistrict: "",
+    b2bState: "",
+    b2bPrincipalName: "",
+    b2bPrincipalMobile1: "",
+    b2bPrincipalMobile2: "",
+    b2bPrincipalEmail: "",
+    b2bContactPersonName: "",
+    b2bContactPersonMobile: "",
+    b2bClass12Strength: "",
+    b2bClass11Strength: "",
+    b2b11thFee: "",
+    b2bClass10Strength: "",
+    b2b10thFee: "",
+    b2bDecisionMakerName: "",
+    b2bDecisionMakerMobile: "",
     nextMeetDate: "03/11/19",
     nextMeetTime: "05:00 pm",
     b2bResidential: "No",
     b2b8910Foundation: "Yes",
     b2bInfrastructure: "Good",
-    b2cStudentName: "Ravi",
-    b2cGuardianName: "Mahesh Raj",
-    b2cStudentMobile1: "1234567890",
-    b2cStudentMobile2: "2342342390",
+    b2cStudentName: "",
+    b2cGuardianName: "",
+    b2cStudentMobile1: "",
+    b2cStudentMobile2: "",
     b2cStudentClass: "8th",
-    b2cSchoolName: "Allen",
-    b2cSchoolEmail: "thisis@school.com",
-    b2cSchoolAddress: "Swargate",
-    b2cCity: "Pune",
-    b2cState: "Maharastra",
+    b2cSchoolName: "",
+    b2cSchoolEmail: "",
+    b2cSchoolAddress: "",
+    b2cCity: "",
+    b2cState: "",
     b2cFinancialStatus: "Poor",
-    b2cPrincipalName: "Amitabh",
-    b2cPrincipalMobile: "9998889989",
+    b2cPrincipalName: "",
+    b2cPrincipalMobile: "",
     b2c8910foundation: "Yes",
     b2cCoaching: "CET,IIT"
   };
@@ -246,7 +246,7 @@ export default class ViewLead extends Component {
         return data.json();
       })
       .then(data => {
-        console.log("EditLead Response", data);
+        console.log("EditB2BLead Response", data);
 
         if (data.message == "succesfully updated") {
           //this._storeData(data.userId);
@@ -275,9 +275,7 @@ export default class ViewLead extends Component {
         gaurdianName: this.state.b2cGuardianName,
         mobile1: this.state.b2cStudentMobile1,
         mobile2: this.state.b2cStudentMobile2,
-        divisionClass: b2cClass_props.find(item => {
-          if (item.value === this.state.b2cStudentClass) return item;
-        }).label,
+        divisionClass: this.state.b2cStudentClass,
         schoolOrCollege: this.state.b2cSchoolName,
         email: this.state.b2cSchoolEmail,
         address: this.state.b2cSchoolAddress,
@@ -289,14 +287,14 @@ export default class ViewLead extends Component {
         //coaching: this.state.b2cCoaching,
         foundation8910: this.state.b2c8910foundation,
         status: this.state.status,
-        leadId: this.state.leadId
+        leadID: this.state.leadId
       })
     })
       .then(data => {
         return data.json();
       })
       .then(data => {
-        //console.log("AddLead Response", data);
+        console.log("EDITB2CLead Response", data);
 
         if (data.message == "succesfully updated") {
           //this._storeData(data.userId);
@@ -312,12 +310,12 @@ export default class ViewLead extends Component {
       });
   };
   editLead() {
-    if (this.state.leadType == 0) {
-      this.editB2BLeadAPI();
-    } else {
+    if (this.state.leadType) {
       this.editB2CLeadAPI();
+    } else {
+      this.editB2BLeadAPI();
     }
-    //console.log("Call Edit");
+    console.log("Call Edit");
   }
   render() {
     return (

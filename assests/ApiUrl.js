@@ -11,3 +11,9 @@ export const EditB2CLeadURL =
   "http://35.161.99.113:9000/webapi/adiLogin/editB2C";
 export const EditB2BLeadURL =
   "http://35.161.99.113:9000/webapi/adiLogin/editB2B";
+export const ForgetPasswordURL =
+  "http://35.161.99.113:9000/webapi/adiLogin/forget_password";
+export const VerifyOtpURL =
+  "http://35.161.99.113:9000/webapi/adiLogin/verifyOtp";
+export const ChangePasswordURL =
+  "http://35.161.99.113:9000/webapi/adiLogin/changePass";

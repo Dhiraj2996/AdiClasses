@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import styled from "styled-components";
 import { GetB2BList, GetB2CList } from "../assests/ApiUrl";
+import { StackActions, NavigationActions } from "react-navigation";
 
 b2bUnverified = [];
 b2bVerified = [];
@@ -31,9 +32,7 @@ export default class DashBoard extends Component {
       title: "Hi," + navigation.getParam("userName") + "!",
       headerRight: (
         <Button
-          onPress={() => {
-            navigation.navigate("Login");
-          }}
+          onPress={navigation.getParam("handleLogout")}
           title="LogOut"
           color="#444"
         />
@@ -51,6 +50,7 @@ export default class DashBoard extends Component {
   };
 
   componentDidMount = async () => {
+    this.props.navigation.setParams({ handleLogout: this.handleLogout });
     const value = await AsyncStorage.getItem("userId");
     console.log("UserId:" + value);
     this.setState({ userId: value });
@@ -91,10 +91,10 @@ export default class DashBoard extends Component {
             if (lead.status == "verified") return lead;
           });
           b2bDead = data.records.filter(lead => {
-            if (lead.status == "followup") return lead;
+            if (lead.status == "dead") return lead;
           });
           b2bFollowup = data.records.filter(lead => {
-            if (lead.status == "appointment fixed") return lead;
+            if (lead.status == "followup") return lead;
           });
           b2bAppointmentFixed = data.records.filter(lead => {
             if (lead.status == "appointment fixed") return lead;
@@ -175,6 +175,14 @@ export default class DashBoard extends Component {
       appointmentDoneCount:
         b2bAppointmentDone.length + b2cAppointmentDone.length
     });
+  };
+  handleLogout = async () => {
+    await AsyncStorage.clear();
+    const resetAction = StackActions.reset({
+      index: 0,
+      actions: [NavigationActions.navigate({ routeName: "Login" })]
+    });
+    this.props.navigation.dispatch(resetAction);
   };
   render() {
     return (
