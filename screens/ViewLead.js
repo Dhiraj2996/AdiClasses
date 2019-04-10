@@ -80,6 +80,8 @@ export default class ViewLead extends Component {
     b2bResidential: "No",
     b2b8910Foundation: "Yes",
     b2bInfrastructure: "Good",
+    b2bRemarks: "",
+
     b2cStudentName: "",
     b2cGuardianName: "",
     b2cStudentMobile1: "",
@@ -125,6 +127,7 @@ export default class ViewLead extends Component {
         b2bResidential: dataItem.residentialCampus,
         b2b8910Foundation: dataItem.foundation8910,
         b2bInfrastructure: dataItem.infrastructure,
+        b2bRemarks: dataItem.remark,
         leadId: dataItem.id,
         status: dataItem.status
       });
@@ -327,7 +330,11 @@ export default class ViewLead extends Component {
               radio_props={radio_props}
               initial={
                 radio_props.find(item => {
-                  if (item.label === this.state.status) return item;
+                  if (
+                    item.label ===
+                    this.props.navigation.getParam("dataItem").status
+                  )
+                    return item;
                 }).value
               }
               onPress={value => {
@@ -771,6 +778,22 @@ export default class ViewLead extends Component {
                     value={this.state.b2bInfrastructure}
                   />
                 )}
+              </View>
+              <View style={styles.flexColumn}>
+                <NameText>Remarks</NameText>
+                <TextInput
+                  style={styles.input}
+                  //onSubmitEditing={() => this.B2Bclass12Strength.focus()}
+                  multiline={true}
+                  autoCorrect={false}
+                  keyboardType="default"
+                  returnKeyType="next"
+                  editable={this.state.editable}
+                  value={this.state.b2bRemarks}
+                  onChangeText={text => {
+                    this.setState({ b2bRemarks: text });
+                  }}
+                />
               </View>
               <View style={styles.flexRow}>
                 <TouchableOpacity

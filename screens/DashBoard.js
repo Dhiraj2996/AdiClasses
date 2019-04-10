@@ -140,10 +140,10 @@ export default class DashBoard extends Component {
             if (lead.status == "verified") return lead;
           });
           b2cDead = data.records.filter(lead => {
-            if (lead.status == "followup") return lead;
+            if (lead.status == "dead") return lead;
           });
           b2cFollowup = data.records.filter(lead => {
-            if (lead.status == "appointment fixed") return lead;
+            if (lead.status == "followup") return lead;
           });
           b2cAppointmentFixed = data.records.filter(lead => {
             if (lead.status == "appointment fixed") return lead;
