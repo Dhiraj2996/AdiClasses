@@ -18,6 +18,7 @@ import RadioForm, {
   RadioButtonLabel
 } from "react-native-simple-radio-button";
 import { EditB2BLeadURL, EditB2CLeadURL } from "../assests/ApiUrl";
+import { CheckBox } from "react-native-elements";
 
 var radio_props = [
   { label: "unverified", value: 0 },
@@ -96,7 +97,13 @@ export default class ViewLead extends Component {
     b2cPrincipalName: "",
     b2cPrincipalMobile: "",
     b2c8910foundation: "Yes",
-    b2cCoaching: "CET,IIT"
+    b2cCoaching: "CET,IIT",
+    b2cRemarks: "",
+
+    CETchecked: false,
+    NEETchecked: false,
+    IITchecked: false,
+    Advancedchecked: false
   };
   componentDidMount() {
     let dataItem = this.props.navigation.getParam("dataItem");
@@ -150,7 +157,28 @@ export default class ViewLead extends Component {
         b2cPrincipalName: dataItem.principalName,
         b2cPrincipalMobile: dataItem.mobile,
         b2c8910foundation: dataItem.foundation8910,
-        b2cCoaching: dataItem.coaching
+        b2cCoaching: dataItem.coaching,
+        b2cRemarks: dataItem.remark
+      });
+      console.log("Coaching Data Received::" + dataItem.coaching);
+      var arrCoachings = JSON.stringify(dataItem.coaching)
+        .replace('"', "")
+        .split(",");
+      arrCoachings.forEach(element => {
+        console.log("Coachings Array:" + element);
+        if (element == "CET") {
+          this.setState({ CETchecked: true });
+        }
+        if (element == "IIT") {
+          this.setState({ IITchecked: true });
+          console.log("IIT");
+        }
+        if (element == "NEET") {
+          this.setState({ NEETchecked: true });
+        }
+        if (element == "Advanced") {
+          this.setState({ Advancedchecked: true });
+        }
       });
     }
   }
@@ -289,6 +317,7 @@ export default class ViewLead extends Component {
         mobile: this.state.b2cPrincipalMobile,
         //coaching: this.state.b2cCoaching,
         foundation8910: this.state.b2c8910foundation,
+        remark: this.state.b2cRemarks,
         status: this.state.status,
         leadID: this.state.leadId
       })
@@ -782,7 +811,7 @@ export default class ViewLead extends Component {
               <View style={styles.flexColumn}>
                 <NameText>Remarks</NameText>
                 <TextInput
-                  style={styles.input}
+                  style={styles.multilineInput}
                   //onSubmitEditing={() => this.B2Bclass12Strength.focus()}
                   multiline={true}
                   autoCorrect={false}
@@ -1068,37 +1097,94 @@ export default class ViewLead extends Component {
               <View style={styles.flexColumn}>
                 <NameText>8,9,10 Foundation</NameText>
                 {this.state.editable ? (
-                  <RadioForm
-                    radio_props={foundation_props}
-                    initial={
-                      foundation_props.find(item => {
-                        if (item.label === this.state.b2c8910foundation)
-                          return item;
-                      }).value
-                    }
-                    onPress={value => {
-                      let temp = foundation_props.find(item => {
-                        if (item.value === value) return item;
-                      }).label;
-                      this.setState({
-                        b2c8910foundation: temp
-                      });
-                    }}
-                    formHorizontal={false}
-                    labelHorizontal={true}
-                    animation={false}
-                    //buttonColor={"#fff"}
-                    labelStyle={{ fontSize: 15, paddingLeft: 5 }}
-                    buttonSize={10}
-                    buttonOuterSize={20}
-                  />
+                  <View>
+                    <RadioForm
+                      radio_props={foundation_props}
+                      initial={
+                        foundation_props.find(item => {
+                          if (item.label === this.state.b2c8910foundation)
+                            return item;
+                        }).value
+                      }
+                      onPress={value => {
+                        let temp = foundation_props.find(item => {
+                          if (item.value === value) return item;
+                        }).label;
+                        this.setState({
+                          b2c8910foundation: temp
+                        });
+                      }}
+                      formHorizontal={false}
+                      labelHorizontal={true}
+                      animation={false}
+                      //buttonColor={"#fff"}
+                      labelStyle={{ fontSize: 15, paddingLeft: 5 }}
+                      buttonSize={10}
+                      buttonOuterSize={20}
+                    />
+                    <NameText>Coaching</NameText>
+
+                    <CheckBox
+                      title="CET"
+                      checked={this.state.CETchecked}
+                      onPress={() =>
+                        this.setState({ CETchecked: !this.state.CETchecked })
+                      }
+                    />
+                    <CheckBox
+                      title="NEET"
+                      checked={this.state.NEETchecked}
+                      onPress={() =>
+                        this.setState({ NEETchecked: !this.state.NEETchecked })
+                      }
+                    />
+                    <CheckBox
+                      title="IIT"
+                      checked={this.state.IITchecked}
+                      onPress={() =>
+                        this.setState({ IITchecked: !this.state.IITchecked })
+                      }
+                    />
+                    <CheckBox
+                      title="Advanced"
+                      checked={this.state.Advancedchecked}
+                      onPress={() =>
+                        this.setState({
+                          Advancedchecked: !this.state.Advancedchecked
+                        })
+                      }
+                    />
+                  </View>
                 ) : (
-                  <TextInput
-                    style={styles.input}
-                    editable={false}
-                    value={this.state.b2c8910foundation}
-                  />
+                  <View>
+                    <TextInput
+                      style={styles.input}
+                      editable={false}
+                      value={this.state.b2c8910foundation}
+                    />
+                    <TextInput
+                      style={styles.input}
+                      editable={false}
+                      value={this.state.b2cCoaching}
+                    />
+                  </View>
                 )}
+              </View>
+              <View style={styles.flexColumn}>
+                <NameText>Remarks</NameText>
+                <TextInput
+                  style={styles.multilineInput}
+                  //onSubmitEditing={() => this.B2Bclass12Strength.focus()}
+                  multiline={true}
+                  autoCorrect={false}
+                  keyboardType="default"
+                  returnKeyType="next"
+                  editable={this.state.editable}
+                  value={this.state.b2cRemarks}
+                  onChangeText={text => {
+                    this.setState({ b2cRemarks: text });
+                  }}
+                />
               </View>
               <View style={styles.flexRow}>
                 <TouchableOpacity

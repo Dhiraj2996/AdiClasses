@@ -95,7 +95,8 @@ export default class AddLead extends Component {
     b2cPrincipalName: "",
     b2cPrincipalMobile: "",
     b2c8910foundation: 0,
-    b2cCoaching: ""
+    b2cCoaching: "",
+    b2cRemarks: ""
   };
 
   componentDidMount = () => {
@@ -224,7 +225,7 @@ export default class AddLead extends Component {
     this.AddB2BLeadAPI();
   };
 
-  AddB2CLeadAPI = () => {
+  AddB2CLeadAPI = varcoaching => {
     console.log("In Addb2cLeadApi");
     fetch(AddB2CLead, {
       method: "POST",
@@ -251,10 +252,11 @@ export default class AddLead extends Component {
         }).label,
         principalName: this.state.b2cPrincipalName,
         mobile: this.state.b2cPrincipalMobile,
-        coaching: this.state.b2cCoaching,
+        coaching: varcoaching,
         foundation8910: foundation_props.find(item => {
           if (item.value === this.state.b2c8910foundation) return item;
-        }).label
+        }).label,
+        remark: this.state.b2cRemarks
       })
     })
       .then(data => {
@@ -266,7 +268,7 @@ export default class AddLead extends Component {
         if (data.message == "Lead Added") {
           //this._storeData(data.userId);
           Alert.alert("Lead Added Successfully");
-          this.props.navigation.navigate("DashBoard");
+          //this.props.navigation.navigate("DashBoard");
         } else if (data.message) {
           Alert.alert(data.message);
         }
@@ -293,7 +295,7 @@ export default class AddLead extends Component {
     }
 
     this.setState({ b2cCoaching: tempCoaching });
-    this.AddB2CLeadAPI();
+    this.AddB2CLeadAPI(tempCoaching);
   };
   render() {
     return (
@@ -902,6 +904,19 @@ export default class AddLead extends Component {
                       Advancedchecked: !this.state.Advancedchecked
                     })
                   }
+                />
+              </View>
+              <View style={styles.flexColumn}>
+                <NameText style={{ color: "#fff", fontSize: 24 }}>
+                  Remarks
+                </NameText>
+                <TextInput
+                  style={styles.multilineInput}
+                  autoCorrect={false}
+                  keyboardType="default"
+                  returnKeyType="next"
+                  multiline={true}
+                  onChangeText={text => this.setState({ b2cRemarks: text })}
                 />
               </View>
               <TouchableOpacity
