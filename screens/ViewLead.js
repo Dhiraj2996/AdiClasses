@@ -293,7 +293,7 @@ export default class ViewLead extends Component {
       });
   };
 
-  editB2CLeadAPI = () => {
+  editB2CLeadAPI = varcoaching => {
     console.log("In Editb2cLeadApi");
     fetch(EditB2CLeadURL, {
       method: "POST",
@@ -315,7 +315,7 @@ export default class ViewLead extends Component {
         financialStatus: this.state.b2cFinancialStatus,
         principalName: this.state.b2cPrincipalName,
         mobile: this.state.b2cPrincipalMobile,
-        //coaching: this.state.b2cCoaching,
+        coaching: varcoaching,
         foundation8910: this.state.b2c8910foundation,
         remark: this.state.b2cRemarks,
         status: this.state.status,
@@ -343,7 +343,20 @@ export default class ViewLead extends Component {
   };
   editLead() {
     if (this.state.leadType) {
-      this.editB2CLeadAPI();
+      let tempCoaching = "";
+      if (this.state.CETchecked) {
+        tempCoaching += "CET,";
+      }
+      if (this.state.NEETchecked) {
+        tempCoaching = "NEET,";
+      }
+      if (this.state.IITchecked) {
+        tempCoaching += "IIT,";
+      }
+      if (this.state.Advancedchecked) {
+        tempCoaching += "Advanced,";
+      }
+      this.editB2CLeadAPI(tempCoaching);
     } else {
       this.editB2BLeadAPI();
     }
