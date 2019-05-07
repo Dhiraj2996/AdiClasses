@@ -19,6 +19,7 @@ import RadioForm, {
 } from "react-native-simple-radio-button";
 import { EditB2BLeadURL, EditB2CLeadURL } from "../assests/ApiUrl";
 import { CheckBox } from "react-native-elements";
+import RNImmediatePhoneCall from "react-native-immediate-phone-call";
 
 var radio_props = [
   { label: "unverified", value: 0 },
@@ -856,7 +857,9 @@ export default class ViewLead extends Component {
                 <TouchableOpacity
                   style={styles.buttonContainer}
                   onPress={() => {
-                    Linking.openURL("tel:" + this.state.b2bContactPersonMobile);
+                    RNImmediatePhoneCall.immediatePhoneCall(
+                      this.state.b2bContactPersonMobile
+                    );
                   }}
                 >
                   <Text style={styles.buttonText}>CALL</Text>
@@ -1175,6 +1178,7 @@ export default class ViewLead extends Component {
                       editable={false}
                       value={this.state.b2c8910foundation}
                     />
+                    <NameText>Coaching</NameText>
                     <TextInput
                       style={styles.input}
                       editable={false}
